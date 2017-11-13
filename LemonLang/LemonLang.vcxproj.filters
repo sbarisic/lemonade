@@ -19,6 +19,12 @@
     <Filter Include="Source Files\src">
       <UniqueIdentifier>{f8fa22f4-de5c-4bd7-a156-6de1da9f6de3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\lib">
+      <UniqueIdentifier>{a0fe47e0-ae71-454b-9e49-59c676e7beee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lib">
+      <UniqueIdentifier>{b8ce47e7-a4d9-43a6-aecd-cc1b3fdfa0b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lemon\src\allocator.c">
@@ -129,13 +135,7 @@
     <ClCompile Include="..\lemon\src\machine.c">
       <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\lemon\src\main.c">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\lemon\src\mpool.c">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lemon\src\opcode.c">
       <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="..\lemon\src\parser.c">
@@ -161,6 +161,9 @@
     </ClCompile>
     <ClCompile Include="..\lemon\src\token.c">
       <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lemon\lib\builtin.c">
+      <Filter>Source Files\lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -302,5 +305,13 @@
     <ClInclude Include="..\lemon\src\token.h">
       <Filter>Header Files\src</Filter>
     </ClInclude>
+    <ClInclude Include="..\lemon\lib\builtin.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\EXPORTS.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

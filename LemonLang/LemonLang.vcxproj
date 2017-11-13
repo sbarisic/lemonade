@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\lemon\lib\builtin.c" />
     <ClCompile Include="..\lemon\src\allocator.c" />
     <ClCompile Include="..\lemon\src\arena.c" />
     <ClCompile Include="..\lemon\src\collector.c" />
@@ -55,9 +56,7 @@
     <ClCompile Include="..\lemon\src\lvarg.c" />
     <ClCompile Include="..\lemon\src\lvkarg.c" />
     <ClCompile Include="..\lemon\src\machine.c" />
-    <ClCompile Include="..\lemon\src\main.c" />
     <ClCompile Include="..\lemon\src\mpool.c" />
-    <ClCompile Include="..\lemon\src\opcode.c" />
     <ClCompile Include="..\lemon\src\parser.c" />
     <ClCompile Include="..\lemon\src\peephole.c" />
     <ClCompile Include="..\lemon\src\scope.c" />
@@ -68,6 +67,7 @@
     <ClCompile Include="..\lemon\src\token.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\lemon\lib\builtin.h" />
     <ClInclude Include="..\lemon\src\allocator.h" />
     <ClInclude Include="..\lemon\src\arena.h" />
     <ClInclude Include="..\lemon\src\collector.h" />
@@ -114,6 +114,9 @@
     <ClInclude Include="..\lemon\src\syntax.h" />
     <ClInclude Include="..\lemon\src\table.h" />
     <ClInclude Include="..\lemon\src\token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\EXPORTS.def" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -170,22 +173,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IncludePath>$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lemon\;$(SolutionDir)c_compat\;$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IncludePath>$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lemon\;$(SolutionDir)c_compat\;$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IncludePath>$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lemon\;$(SolutionDir)c_compat\;$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IncludePath>$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lemon\;$(SolutionDir)c_compat\;$(SolutionDir)lemon\src\;$(SolutionDir)lemon\lib\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -193,12 +196,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;LEMONLANG_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);STATIC=0;DEBUG=0;USE_MALLOC=0</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>$(SolutionDir)EXPORTS.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -207,12 +212,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;LEMONLANG_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);STATIC=0;DEBUG=0;USE_MALLOC=0</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>$(SolutionDir)EXPORTS.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -223,14 +230,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;LEMONLANG_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);STATIC=0;DEBUG=0;USE_MALLOC=0</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>$(SolutionDir)EXPORTS.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -241,14 +250,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;LEMONLANG_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);STATIC=0;DEBUG=0;USE_MALLOC=0</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>$(SolutionDir)EXPORTS.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
