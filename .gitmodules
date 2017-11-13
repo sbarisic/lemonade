@@ -1,0 +1,3 @@
+[submodule "lemon"]
+	path = lemon
+	url = https://github.com/lemon-lang/lemon
