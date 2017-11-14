@@ -197,7 +197,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <CompileAs>Default</CompileAs>
-      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;USE_MALLOC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,7 +214,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <CompileAs>Default</CompileAs>
-      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;USE_MALLOC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -231,7 +233,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <CompileAs>Default</CompileAs>
-      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;USE_MALLOC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -251,7 +254,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <CompileAs>Default</CompileAs>
-      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;USE_MALLOC=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

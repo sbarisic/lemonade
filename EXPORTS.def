@@ -53,3 +53,4 @@ lemon_collector_untrace
 lemon_collector_mark
 lemon_collector_barrier
 lemon_collector_barrierback
+builtin_init
