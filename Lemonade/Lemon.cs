@@ -94,12 +94,12 @@ namespace Lemonade {
 	}
 
 	[UnmanagedFunctionPointer(LemonLang.CConv, CharSet = LemonLang.CSet)]
-	public delegate LObjectPtr LFunctionCall(LemonPtr Lmn, LObjectPtr Self, int Cnt, LObjectPtr[] Args);
+	public unsafe delegate LObjectPtr LFunctionCall(LemonPtr Lmn, LObjectPtr Self, int Cnt, LObjectPtrArray Args);
 
 	[UnmanagedFunctionPointer(LemonLang.CConv, CharSet = LemonLang.CSet)]
-	public delegate LObjectPtr LObjectMethod(LemonPtr Lmn, LObjectPtr Self, LOBJECT_METHOD Method, int ArgC, LObjectPtr[] ArgV);
+	public unsafe delegate LObjectPtr LObjectMethod(LemonPtr Lmn, LObjectPtr Self, LOBJECT_METHOD Method, int ArgC, LObjectPtrArray ArgV);
 
-	public unsafe struct LemonLang {
+	public unsafe static class LemonLang {
 		const string DllName = nameof(LemonLang);
 		internal const CallingConvention CConv = CallingConvention.Cdecl;
 		internal const CharSet CSet = CharSet.Ansi;
@@ -116,81 +116,142 @@ namespace Lemonade {
 
 		// Builtin
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern void builtin_init(LemonPtr Lmn);
 
 		// Lemon
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern LemonPtr lemon_create();
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern void lemon_machine_reset(LemonPtr Lmn);
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern int lemon_machine_execute(LemonPtr Lmn);
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lemon_machine_execute_loop(LemonPtr Lmn);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern int lemon_input_set_file(LemonPtr Lmn, string FileName);
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern int lemon_input_set_buffer(LemonPtr Lmn, string FileName, string Buffer, int Len);
 
 		public static int lemon_input_set_buffer(LemonPtr Lmn, string FileName, string Buffer) {
 			return lemon_input_set_buffer(Lmn, FileName, Buffer, Buffer.Length);
 		}
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern int lemon_compile(LemonPtr Lmn);
 
 		public static int lemon_compile(LemonPtr Lmn, out string Err) {
 			return RedirErr(() => lemon_compile(Lmn), out Err);
 		}
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern void lemon_destroy(LemonPtr Lmn);
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern LObjectPtr lemon_add_global(LemonPtr Lmn, string Name, IntPtr Obj);
 
-		// String
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
-		public static extern IntPtr lstring_create(LemonPtr Lmn, string Buffer, int Len);
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern void lemon_collector_enable(LemonPtr Lmn);
 
-		public static IntPtr lstring_create(LemonPtr Lmn, string Buffer) {
-			return lstring_create(Lmn, Buffer, Buffer.Length);
-		}
-
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
-		[return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(StringMarshal))]
-		public static extern string lstring_to_cstr(LemonPtr Lmn, LObjectPtr Obj);
-
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern void lemon_collector_disable(LemonPtr Lmn);
+		
 		// Function
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern IntPtr lfunction_create(LemonPtr Lmn, LObjectPtr Name, LObjectPtr Self,
 			[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(DelegateMarshal), MarshalCookie = nameof(LFunctionCall))] LFunctionCall Callback);
 
 		// Object
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern IntPtr lobject_create(LemonPtr Lmn, IntPtr Size,
 			[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(DelegateMarshal), MarshalCookie = nameof(LObjectMethod))]  LObjectMethod Method);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lobject_create(LemonPtr Lmn, IntPtr Size, IntPtr Method);
 
 		public static ref T lobject_create<T>(LemonPtr Lmn, LObjectMethod Method) where T : struct {
 			LObjectPtr ObjPtr = lobject_create(Lmn, (IntPtr)(Marshal.SizeOf<LObject>() + Marshal.SizeOf<T>()), Method);
 			return ref ObjPtr.AsRef<T>();
 		}
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
-		public static extern IntPtr lobject_default(LemonPtr Lmn, LObjectPtr Self, LOBJECT_METHOD Method, int ArgC, LObjectPtr[] ArgV);
+		public static ref T lobject_create<T>(LemonPtr Lmn, IntPtr Method) where T : struct {
+			LObjectPtr ObjPtr = lobject_create(Lmn, (IntPtr)(Marshal.SizeOf<LObject>() + Marshal.SizeOf<T>()), Method);
+			return ref ObjPtr.AsRef<T>();
+		}
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lobject_default(LemonPtr Lmn, LObjectPtr Self, LOBJECT_METHOD Method, int ArgC, LObjectPtrArray ArgV);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lobject_set_attr(LemonPtr Lmn, LObjectPtr Self, LObjectPtr Name, LObjectPtr Value);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern bool lobject_is_string(LemonPtr Lmn, LObjectPtr Obj);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern bool lobject_is_number(LemonPtr Lmn, LObjectPtr Obj);
+		
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern bool lobject_is_error(LemonPtr Lmn, LObjectPtr Obj);
 
 		// Type 
 
-		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet, SetLastError = true)]
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
 		public static extern IntPtr ltype_create(LemonPtr Lmn, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(StringMarshal))] string Name,
 			[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(DelegateMarshal), MarshalCookie = nameof(LObjectMethod))] LObjectMethod Method,
 			 [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(DelegateMarshal), MarshalCookie = nameof(LObjectMethod))] LObjectMethod TypeMethod);
+
+		// Module
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lmodule_create(LemonPtr Lmn, LObjectPtr Name);
+
+		// Sentinel
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lsentinel_create(LemonPtr Lmn);
+
+		// String
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lstring_create(LemonPtr Lmn, string Buffer, int Len);
+
+		public static IntPtr lstring_create(LemonPtr Lmn, string Buffer) {
+			return lstring_create(Lmn, Buffer, Buffer.Length);
+		}
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		[return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(StringMarshal))]
+		public static extern string lstring_to_cstr(LemonPtr Lmn, LObjectPtr Obj);
+
+		// Number
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern double lnumber_to_double(LemonPtr Lmn, LObjectPtr Obj);
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lnumber_create_from_double(LemonPtr Lmn, double Num);
+
+		// Nil
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lnil_create(LemonPtr Lmn);
+
+		// Boolean
+
+		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
+		public static extern IntPtr lboolean_create(LemonPtr Lmn, int Val);
+
+		public static IntPtr lboolean_create(LemonPtr Lmn, bool Val) {
+			return lboolean_create(Lmn, Val ? 1 : 0);
+		}
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -201,17 +262,19 @@ namespace Lemonade {
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public unsafe struct LType {
-		public string NamePtr;
-		public LObjectMethod MethodPtr;
-		public LObjectMethod TypeMethodPtr;
+		LObject Obj;
 
-		/*public string Name {
+		public IntPtr NamePtr;
+		public IntPtr MethodPtr;
+		public IntPtr TypeMethodPtr;
+
+		public string Name {
 			get {
 				return Marshal.PtrToStringAnsi(NamePtr);
 			}
 		}
 
-		public LObjectMethod Method {
+		/*public LObjectMethod Method {
 			get {
 				return Marshal.GetDelegateForFunctionPointer<LObjectMethod>(MethodPtr);
 			}
@@ -225,7 +288,32 @@ namespace Lemonade {
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct LemonPtr {
+	public unsafe struct LTypePtr {
+		public LType* Ptr;
+
+		public static implicit operator LTypePtr(IntPtr Ptr) {
+			LTypePtr Obj = new LTypePtr();
+			Obj.Ptr = (LType*)Ptr.ToPointer();
+			return Obj;
+		}
+
+		public static implicit operator IntPtr(LTypePtr Ptr) {
+			return (IntPtr)Ptr.Ptr;
+		}
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	public struct Machine {
+		public int PC; /* program counter */
+		public int FP; /* frame pointer */
+		public int SP; /* stack pointer */
+
+		public int Halt;
+		public int MaxPC;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	public unsafe struct LemonPtr {
 		public IntPtr Ptr;
 
 		public static implicit operator LemonPtr(IntPtr Ptr) {
@@ -236,6 +324,15 @@ namespace Lemonade {
 
 		public static implicit operator IntPtr(LemonPtr Ptr) {
 			return Ptr.Ptr;
+		}
+
+		public Machine* GetMachinePtr() {
+			int Offset = 8 * IntPtr.Size + 4;
+			return *(Machine**)(Ptr + Offset);
+		}
+
+		public ref Machine GetMachineRef() {
+			return ref Unsafe.AsRef<Machine>(GetMachinePtr());
 		}
 
 		public override string ToString() {
@@ -267,6 +364,28 @@ namespace Lemonade {
 
 		public static IntPtr AsPtr<T>(ref T Val) where T : struct {
 			return (IntPtr)Unsafe.AsPointer(ref Val) - Marshal.SizeOf<LObject>();
+		}
+	}
+
+	public unsafe struct LObjectPtrArray {
+		public LObjectPtr* Array;
+
+		public LObjectPtr this[int Idx] {
+			get {
+				return Array[Idx];
+			}
+			set {
+				Array[Idx] = value;
+			}
+		}
+
+		public LObjectPtr[] ToArray(int Count) {
+			LObjectPtr[] Arr = new LObjectPtr[Count];
+
+			for (int i = 0; i < Count; i++)
+				Arr[i] = this[i];
+
+			return Arr;
 		}
 	}
 }

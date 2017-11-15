@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LemonNet.cs" />
     <Compile Include="Lemon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Marshals.cs" />
