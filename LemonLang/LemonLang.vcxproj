@@ -199,6 +199,7 @@
       <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -216,6 +217,7 @@
       <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -235,6 +237,7 @@
       <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -256,6 +259,7 @@
       <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>WINDOWS;PATH_MAX=4096;_CRT_SECURE_NO_WARNINGS;STATIC=0;DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
