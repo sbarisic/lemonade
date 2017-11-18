@@ -19,14 +19,36 @@ namespace Lemonade {
 
 	public static unsafe class LemonNet {
 		static Dictionary<Type, LTypePtr> Types;
-		static Dictionary<Type, IntPtr> Modules;
+		static Dictionary<Type, LObjectPtr> Modules;
 
 		static HashSet<LemonMarshal> Marshals;
 
 		static LemonNet() {
 			Types = new Dictionary<Type, LTypePtr>();
-			Modules = new Dictionary<Type, IntPtr>();
+			Modules = new Dictionary<Type, LObjectPtr>();
 			Marshals = new HashSet<LemonMarshal>();
+
+
+			// Function
+			AddMarshal((LemonPtr Lmn, LObjectPtr Obj, out object Ret) => {
+
+				Ret = null;
+				return false;
+			}, (LemonPtr Lmn, object Obj, out LObjectPtr Ret) => {
+				if (Obj != null) {
+					MethodInfo[] CreateFuncs = typeof(LemonNet).GetMethods().Where((MI) => MI.Name == "CreateFunc" && MI.GetParameters().Length == 2).ToArray();
+					for (int i = 0; i < CreateFuncs.Length; i++) {
+						if (CreateFuncs[i].GetParameters()[1].ParameterType == Obj.GetType()) {
+
+							Ret = (LObjectPtr)CreateFuncs[i].Invoke(null, new object[] { Lmn, Obj });
+							return true;
+						}
+					}
+				}
+
+				Ret = IntPtr.Zero;
+				return false;
+			});
 
 			// String
 			AddMarshal((LemonPtr Lmn, LObjectPtr Obj, out object Ret) => {
@@ -112,41 +134,53 @@ namespace Lemonade {
 			return LObjectPtr.AsPtr<T>(ref Obj);
 		}
 
-		public static IntPtr CreateFunc(LemonPtr Lmn, string Name, IntPtr Self, LFunctionCall Callback) {
-			return LemonLang.lfunction_create(Lmn, Name != null ? LemonLang.lstring_create(Lmn, Name) : IntPtr.Zero, Self, Callback);
-		}
-
-		public static IntPtr CreateFunc(LemonPtr Lmn, string Name, LFunctionCall Callback) {
-			return CreateFunc(Lmn, Name, IntPtr.Zero, Callback);
-		}
-
-		public static IntPtr CreateModule(LemonPtr Lmn, Type T, bool MakeWrapper = false) {
+		public static LObjectPtr CreateModule(LemonPtr Lmn, Type T, bool MakeWrapper = true) {
 			if (Modules.ContainsKey(T))
 				throw new Exception("Module already registered " + T);
 
 			string Name = T.Name;
-			IntPtr Module = LemonLang.lmodule_create(Lmn, LemonLang.lstring_create(Lmn, Name));
+			LObjectPtr Module = LemonLang.lmodule_create(Lmn, LemonLang.lstring_create(Lmn, Name));
 
 			MethodInfo[] Methods = T.GetMethods();
 			foreach (var M in Methods) {
-				LFunctionCall F = null;
+				MethodInfo FInfo = null;
 				string FName = M.Name;
 
 				if (M.ReturnType == typeof(LObjectPtr) &&
 					M.GetParameters().Select((PI) => PI.ParameterType).SequenceEqual(typeof(LFunctionCall).GetMethod("Invoke").GetParameters().Select((PI) => PI.ParameterType))) {
-					F = (LFunctionCall)Delegate.CreateDelegate(typeof(LFunctionCall), M);
+					FInfo = M;
 				} else if (MakeWrapper && M.IsStatic) {
-					F = CreateWrapper(Lmn, M);
+					FInfo = M;
 				}
 
-				if (F != null) {
-					IntPtr LF = CreateFunc(Lmn, Name, F);
-					LemonLang.lobject_set_attr(Lmn, Module, LemonLang.lstring_create(Lmn, FName), LF);
-				}
+				if (FInfo != null)
+					LemonLang.lobject_set_attr(Lmn, Module, LemonLang.lstring_create(Lmn, FName), CreateFunc(Lmn, FInfo));
 			}
 
 			Modules.Add(T, Module);
 			return Module;
+		}
+
+		public static LObjectPtr CreateFunc(LemonPtr Lmn, string Name, IntPtr Self, LFunctionCall Callback) {
+			if (Name == null)
+				throw new Exception("Name must not be null");
+
+			return LemonLang.lfunction_create(Lmn, LemonLang.lstring_create(Lmn, Name), Self, Callback);
+		}
+
+		public static LObjectPtr CreateFunc(LemonPtr Lmn, MethodInfo MI) {
+			if (!MI.IsStatic)
+				throw new Exception("Only static functions can be converted");
+
+			return CreateFunc(Lmn, MI.ToString(), IntPtr.Zero, CreateWrapper(Lmn, MI));
+		}
+
+		public static LObjectPtr CreateFunc(LemonPtr Lmn, Func<object[], object> Fnc) {
+			return CreateFunc(Lmn, Fnc.Method);
+		}
+
+		public static LFunctionCall CreateWrapper(LemonPtr Lmn, Func<object[], object> Fnc) {
+			return CreateWrapper(Lmn, Fnc.Method);
 		}
 
 		public static LFunctionCall CreateWrapper(LemonPtr Lmn, MethodInfo MI) {
@@ -159,7 +193,15 @@ namespace Lemonade {
 
 			Expression Null = Expression.Constant(null);
 			MethodCallExpression ToObjArray = Expression.Call(B.GetMethod(nameof(ToObjectArray)), LmnParam, CountParam, ArgsParam);
-			MethodCallExpression CallFunc = Expression.Call(MI, ToObjArray);
+
+			ParameterInfo[] Params = MI.GetParameters();
+
+			MethodCallExpression CallFunc = null;
+			if (MI.IsStatic)
+				CallFunc = Expression.Call(MI, ToObjArray);
+			else
+				CallFunc = Expression.Call(Expression.Convert(Null, MI.DeclaringType), MI, ToObjArray);
+
 			MethodCallExpression Body = Expression.Call(B.GetMethod(nameof(ConvertToLemon)), LmnParam, CallFunc);
 			LambdaExpression L = Expression.Lambda(typeof(LFunctionCall), Body, LmnParam, SelfParam, CountParam, ArgsParam);
 			return (LFunctionCall)L.Compile();
@@ -177,6 +219,8 @@ namespace Lemonade {
 		public static LObjectPtr ConvertToLemon(LemonPtr Lmn, object O) {
 			if (O is LObjectPtr)
 				return (LObjectPtr)O;
+			if (O is LTypePtr)
+				return (IntPtr)(LTypePtr)O;
 
 			if (O == null)
 				return LemonLang.lnil_create(Lmn);
@@ -194,6 +238,17 @@ namespace Lemonade {
 					return Ret;
 
 			return O;
+		}
+
+		public static LemonPtr CreateNew(bool InitBuiltin = true) {
+			LemonPtr Lmn = LemonLang.lemon_create();
+			if (InitBuiltin)
+				LemonLang.builtin_init(Lmn);
+			return Lmn;
+		}
+
+		public static LObjectPtr AddGlobal(LemonPtr Lmn, string Name, object Value) {
+			return LemonLang.lemon_add_global(Lmn, Name, ConvertToLemon(Lmn, Value));
 		}
 
 		/*public static void BeginStep(LemonPtr Lmn) {

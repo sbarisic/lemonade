@@ -165,7 +165,7 @@ namespace Lemonade {
 		// Function
 
 		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
-		public static extern IntPtr lfunction_create(LemonPtr Lmn, LObjectPtr Name, LObjectPtr Self,
+		public static extern LObjectPtr lfunction_create(LemonPtr Lmn, LObjectPtr Name, LObjectPtr Self,
 			[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(DelegateMarshal), MarshalCookie = nameof(LFunctionCall))] LFunctionCall Callback);
 
 		// Object
@@ -212,7 +212,7 @@ namespace Lemonade {
 		// Module
 
 		[DllImport(DllName, CallingConvention = CConv, CharSet = CSet)]
-		public static extern IntPtr lmodule_create(LemonPtr Lmn, LObjectPtr Name);
+		public static extern LObjectPtr lmodule_create(LemonPtr Lmn, LObjectPtr Name);
 
 		// Sentinel
 

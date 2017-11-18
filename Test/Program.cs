@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using Lemonade;
 
 namespace Test {
-	unsafe class Program {
+	unsafe static class Program {
 		[StructLayout(LayoutKind.Sequential, Pack = 1)]
 		public struct NetString {
 			public string String;
@@ -56,17 +56,33 @@ namespace Test {
 			}
 
 			public static object write(object[] args) {
-				foreach (var a in args)
-					Console.Write("{0} ", a);
+				Console.Write(string.Join(" ", args));
+				return null;
+			}
+
+			public static object writeline(object[] args) {
+				Console.WriteLine(string.Join("", args));
 				return null;
 			}
 		}
 
-		static void Main(string[] args) {
-			LemonPtr Lmn = LemonLang.lemon_create();
-			LemonLang.builtin_init(Lmn);
+		static object FF(object[] Args) {
+			Console.WriteLine("Hello Test World!");
+			return null;
+		}
 
-			LemonLang.lemon_add_global(Lmn, nameof(test), LemonNet.CreateModule(Lmn, typeof(test), true));
+		static void Main(string[] args) {
+			LemonPtr Lmn = LemonNet.CreateNew();
+			LemonNet.AddGlobal(Lmn, nameof(test), LemonNet.CreateModule(Lmn, typeof(test)));
+
+			LemonNet.AddGlobal(Lmn, "test1", new Func<object[], object>(FF));
+			LemonNet.AddGlobal(Lmn, "_str", "Some string");
+			LemonNet.AddGlobal(Lmn, "_num", 256.2);
+
+			/*LemonNet.AddGlobal(Lmn, "test2", LemonNet.CreateFunc(Lmn, null, LemonNet.CreateWrapper(Lmn, new Func<object[], object>((Args) => {
+				Console.WriteLine("Test 2!");
+				return null;
+			}))));*/
 
 			if (LemonLang.lemon_input_set_file(Lmn, "Test.lm") == 0) {
 				Console.WriteLine("Could not read input file");
